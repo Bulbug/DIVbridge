@@ -1,0 +1,14 @@
+{
+  "bot_token": "PASTE_LAUNCHER_BOT_TOKEN_HERE",
+  "guild_id": "PASTE_SERVER_ID_HERE",
+
+  "server_dir": "C:/path/to/your/paper/server",
+  "start_command": ["java", "-Xms2G", "-Xmx4G", "-jar", "paper.jar", "--nogui"],
+
+  "server_host": "127.0.0.1",
+  "server_port": 25565,
+  "boot_timeout_seconds": 180,
+
+  "allowed_role_ids": [],
+  "allowed_user_ids": []
+}

@@ -1,0 +1,15 @@
+name: DiscordBridge
+version: '${version}'
+main: io.github.kaz.discordbridge.DiscordBridge
+api-version: '1.21'
+authors: [Kaz]
+description: Chat bridge, join messages and remote commands between Minecraft and Discord.
+commands:
+  discordbridge:
+    description: Admin command for DiscordBridge
+    usage: /discordbridge reload
+    permission: discordbridge.admin
+permissions:
+  discordbridge.admin:
+    description: Reload the DiscordBridge config
+    default: op

@@ -1,0 +1,45 @@
+# ---------------------------------------------------------------
+# Connection (needs a Discord BOT, see README.md)
+# Keep IDs in quotes. Changing these needs a server restart.
+# ---------------------------------------------------------------
+bot-token: "PASTE_BOT_TOKEN_HERE"
+guild-id: "PASTE_SERVER_ID_HERE"       # the Discord server
+channel-id: "PASTE_CHANNEL_ID_HERE"    # the channel used for chat + notifications
+
+# ---------------------------------------------------------------
+# Chat bridge
+# ---------------------------------------------------------------
+chat:
+  minecraft-to-discord: true
+  discord-to-minecraft: true
+  # Sent to Discord. Placeholders: %player% %message%
+  minecraft-format: "**%player%**: %message%"
+  # Shown in game (MiniMessage). Placeholders: <user> <message>
+  discord-format: "<dark_aqua>[Discord] <white><user><gray>: <white><message>"
+
+# ---------------------------------------------------------------
+# Notifications posted to the channel. Placeholders: %player% %online%
+# ---------------------------------------------------------------
+events:
+  join: true
+  join-message: "🟢 **%player%** joined the server (%online% online)"
+  first-join-message: "🎉 **%player%** joined for the first time! Welcome!"
+  quit: true
+  quit-message: "🔴 **%player%** left the server (%online% online)"
+  death: true
+  death-message: "💀 %message%"
+  server-start: true
+  server-start-message: "✅ The server is now online!"
+  server-stop: true
+  server-stop-message: "⛔ The server is shutting down."
+
+# ---------------------------------------------------------------
+# /cmd slash command in Discord (runs a command as the server console)
+# This is powerful. Only list people/roles you fully trust.
+# If both lists are empty, nobody can use /cmd.
+# ---------------------------------------------------------------
+commands:
+  enabled: true
+  allowed-role-ids: []     # e.g. ["123456789012345678"]
+  allowed-user-ids: []     # e.g. ["123456789012345678"]
+  blocked-commands: ["op", "deop"]

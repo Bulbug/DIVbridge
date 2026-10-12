@@ -1,0 +1,25 @@
+# Gradle / build output
+.gradle/
+build/
+out/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Test server folder, if you keep one next to the code
+run/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# SECRETS: never commit these
+launcher/config.json
+*.token
+.env
+
+# Logs
+*.log
