@@ -11,18 +11,20 @@ connected even when they aren't in the game.
 
 | Feature | What you get |
 |---|---|
-| **Two-way chat** | Messages typed in the Discord channel show up in game, and in-game chat shows up in Discord |
-| **Activity feed** | Join, leave, death, first-join, and server start/stop messages posted to Discord |
+| **Two-way chat** | Discord messages show up in game (with a hover tag and clickable attachments), and in-game chat shows up in Discord, optionally as each player (their name and head) |
+| **Activity cards** | Clean embed cards with the player's head for join, leave, death, first-join, and server start/stop |
+| **`/list` in Discord** | A live card showing who's online, the player count and server TPS |
+| **Proximity voice** (optional) | Players link their account and join a Discord voice channel. The bot moves people near each other in the game into the same voice room. Works for Bedrock and Java players |
 | **`/cmd` in Discord** | Run server commands (like `whitelist add Steve` or `say hello`) from Discord, with the output posted back |
 | **`/start` in Discord** | Boot the server from Discord when it's turned off |
 
 **What it looks like**
 
-In Discord:
+In Discord (these are embed cards and webhook chat, shown here as text):
 ```
-🟢 Steve joined the server (3 online)
-Steve: anyone want to trade?
-💀 Steve fell from a high place
+[head] Steve joined the server          <- green card, footer "3 online"
+[head] Steve: anyone want to trade?     <- chat, sent as Steve
+[head] Steve fell from a high place     <- grey card
 ```
 In game:
 ```
@@ -53,100 +55,86 @@ from the small launcher program. If you don't need `/start`, skip the launcher e
 
 ---
 
-## Setting it up on your server
+## Setting it up
 
-### Step 1: Create the Discord bot
+**The complete, step-by-step guide is [docs/SETUP.md](docs/SETUP.md).** It has the exact buttons to click,
+exact text to type, example config files and a full troubleshooting table.
 
-1. Go to the [Discord Developer Portal](https://discord.com/developers/applications) and click **New Application**. Name it something like "MC Bridge".
-2. Open the **Bot** tab:
-   - Click **Reset Token** and copy the token somewhere safe. It's like a password, so never share it.
-   - Scroll down and turn on **Message Content Intent**. Without this, the bot can't read chat from Discord.
-3. Open **OAuth2 > URL Generator**:
-   - Under Scopes, tick `bot` and `applications.commands`.
-   - Under Bot Permissions, tick **View Channels**, **Send Messages** and **Read Message History**.
-4. Copy the generated URL, open it in your browser, and add the bot to your Discord server.
+The short version:
 
-### Step 2: Copy your Discord IDs
+1. Create a Discord bot in the [Developer Portal](https://discord.com/developers/applications), turn on
+   **Message Content Intent**, and copy its token.
+2. Invite it to your Discord server (the guide has a ready-made invite link with the right permissions).
+3. Copy your server ID and channel ID (Discord Developer Mode, then right-click, then Copy ID).
+4. Put `DiscordBridge-x.y.z.jar` in your Paper server's `plugins/` folder, start the server once, stop it.
+5. Fill in `bot-token`, `guild-id` and `channel-id` in `plugins/DiscordBridge/config.yml`, then start the server.
+6. Look for `Connected to Discord as ...` in the console, then test chat, `/list` and `/cmd`.
 
-1. In Discord, go to **User Settings > Advanced** and turn on **Developer Mode**.
-2. Right-click the pieces below and choose **Copy ID** for each:
-   - Your **server** (name at the top-left): this is the `guild-id`
-   - The **channel** you want to use for chat and notifications: this is the `channel-id`
-   - Your **own user**, or a **staff role**: these decide who may use `/cmd`
+Optional extras, each with its own section in the guide:
+[webhook chat](docs/SETUP.md#part-6a-optional-nicer-in-game-chat-with-a-webhook),
+[`/cmd`](docs/SETUP.md#part-6b-optional-run-server-commands-from-discord-cmd),
+[Discord proximity voice rooms](docs/SETUP.md#part-6c-optional-discord-proximity-voice-rooms) and
+[the `/start` launcher](docs/SETUP.md#part-7-optional-start-the-server-from-discord-the-launcher).
 
-### Step 3: Install the plugin
-
-1. Download `DiscordBridge-x.y.z.jar` from the [Releases](../../releases) page. (Or [build it yourself](#building-from-source).)
-2. Put the jar in your server's `plugins/` folder.
-3. Start the server once, then stop it. This creates `plugins/DiscordBridge/config.yml`.
-
-### Step 4: Edit the config
-
-Open `plugins/DiscordBridge/config.yml` and fill in the top section. Keep the quotes around the IDs.
-
-```yaml
-bot-token: "your-bot-token"
-guild-id: "your server ID"
-channel-id: "your channel ID"
-
-commands:
-  enabled: true
-  allowed-user-ids: ["your user ID"]
-  allowed-role-ids: []        # or ["a staff role ID"]
-```
-
-> **Important:** if both `allowed-user-ids` and `allowed-role-ids` are empty, nobody can use `/cmd`.
-
-### Step 5: Start the server and check the console
-
-Start the server again. You should see:
-```
-[DiscordBridge] Connected to Discord as <your bot name>
-```
-Your bot will also appear online in Discord, and a "server is online" message should be posted in your channel.
-
-### Step 6: Test it
-
-- Type something in the Discord channel. It should appear in game as `[Discord] YourName: ...`
-- Say something in game. It should appear in the Discord channel.
-- Join the server. A join message should appear in the channel.
-- In Discord, type `/cmd` and pick the `command` option, for example `list`. The bot replies with the result.
-
-### Step 7 (optional): Set up `/start`
-
-This lets staff turn the server on from Discord. It's a separate bot that runs 24/7 on the same
-machine as your Minecraft server.
-
-1. Create a **second** application in the Developer Portal (for example "MC Launcher"), copy its token,
-   and invite it with the `bot` and `applications.commands` scopes. It needs no extra permissions.
-   You do **not** need Message Content Intent for this one.
-2. Set it up:
-   ```
-   cd launcher
-   pip install -r requirements.txt
-   cp config.example.json config.json
-   ```
-3. Edit `launcher/config.json`:
-
-   | Setting | Meaning |
-   |---|---|
-   | `bot_token` | Token of the **launcher** bot |
-   | `guild_id` | Your Discord server ID |
-   | `server_dir` | Folder containing your `paper.jar` |
-   | `start_command` | How you normally start the server, as a list |
-   | `server_port` | Your server port (default 25565) |
-   | `allowed_role_ids` / `allowed_user_ids` | Who may use `/start` (empty = nobody) |
-
-4. Run `python launcher_bot.py` and leave it running. Set it to start on boot so it survives restarts.
-
-Now `/start` boots the server and tells you when it's ready, and `/status` says whether it's online.
-To stop the server from Discord, use `/cmd command:stop`.
+For **real in-game voice for Bedrock players**, see
+[docs/BEDROCK-VOICE-CHAT-SETUP.md](docs/BEDROCK-VOICE-CHAT-SETUP.md).
 
 ---
 
+## Proximity voice (talk to the players near you)
+
+> **Want real in-game voice for Bedrock players** (hear nearby players, fading with distance, no Discord needed)?
+> That's a separate project, Bedrock Voice Chat. See [docs/BEDROCK-VOICE-CHAT-SETUP.md](docs/BEDROCK-VOICE-CHAT-SETUP.md).
+> The Discord rooms below are the simpler option that needs no extra server.
+
+Bedrock players can't install Java voice-chat mods, so this uses **Discord itself** for voice. Players stay in a
+Discord voice channel (on their phone, PC or console) while they play. The bot watches where they are in the game
+and automatically moves people who are close together into the same temporary voice room.
+
+- Walk up to someone and you land in the same room, so you can talk.
+- Walk away and you're moved to a different room, or back to the lobby if nobody is near you.
+- Works for **Bedrock and Java** players on the same server.
+- **The plugin never listens to or records any audio.** It only moves people between voice channels.
+
+### Set it up
+
+The full walkthrough, with every click, is in [docs/SETUP.md](docs/SETUP.md#part-6c-optional-discord-proximity-voice-rooms). The short version:
+
+1. In Discord, create a **voice channel** named something like "Lobby", and a **category** (for example "Voice Rooms").
+   The bot makes its temporary rooms inside that category.
+2. Give the bot these permissions in the lobby and the category: **View Channel**, **Connect**, **Manage Channels**
+   and **Move Members**. Make sure your players have **Connect** and **Speak** in the category too.
+3. Copy the IDs of the lobby channel and the category (Developer Mode, then right-click, then Copy ID).
+4. In `config.yml`, set:
+   ```yaml
+   voice:
+     enabled: true
+     lobby-channel-id: "your lobby voice channel ID"
+     category-id: "your category ID"
+     radius: 32
+   ```
+5. Restart the server. You should see `Proximity voice is on` in the console.
+
+### How players use it
+
+1. In Minecraft, type `/link`. You get a 6-character code (it works on Bedrock too).
+2. In Discord, type `/link` and enter the code.
+3. Join the **Lobby** voice channel in Discord and keep Discord open while you play.
+4. Walk near other players to talk. Use `/unlink` (in game or in Discord) to remove the link.
+
+Links are stored in `plugins/DiscordBridge/links.yml`.
+
+### Good to know
+
+- Everyone in a room hears each other at the same volume. There's no fading with distance.
+- The bot can only move people who are **already in a voice channel**. It can't pull anyone in, so players must join the lobby first.
+- The bot only touches people in the lobby or its own rooms. If someone joins a different voice channel, it leaves them alone.
+- Moves are checked every few seconds (`update-seconds`), and Discord limits how fast people can be moved, so very busy servers may see small delays.
+- Players in different worlds or dimensions are never put in the same room.
+
 ## Configuration
 
-Everything is in [`plugin/src/main/resources/config.yml`](plugin/src/main/resources/config.yml) (the copy at
+Everything, including the colors and look of the cards (`style:`), is in [`plugin/src/main/resources/config.yml`](plugin/src/main/resources/config.yml) (the copy at
 `plugins/DiscordBridge/config.yml` on your server). Each message can be changed or turned off.
 
 Placeholders: `%player%`, `%online%`, `%message%`. Messages shown in game use
@@ -170,6 +158,13 @@ Changing the token or IDs needs a server restart.
 | "Could not find the channel" | Wrong `channel-id`, or the bot can't see that channel. Check the channel's permissions. |
 | "Could not find the Discord server" | Wrong `guild-id`, or the bot hasn't been invited to that server. |
 | Discord messages don't appear in game | Turn on **Message Content Intent** in the Developer Portal, then restart. Make sure you're typing in the configured channel. |
+| Cards show as nothing / bot errors in the console when posting | The bot needs the **Embed Links** permission in the channel. Or set `style.use-embeds: false`. |
+| In-game chat still shows as the bot, not the player | `chat.webhook-url` is empty or invalid. It must start with `https://discord.com/api/webhooks/`. |
+| A player's chat shows up as plain bot text | Discord rejects some webhook names (for example ones containing "discord"). The plugin falls back to plain text for those. |
+| Proximity voice does nothing / console says the bot is missing a permission | Give the bot **Manage Channels**, **Move Members** and **Connect** on the lobby and the category. |
+| Console says `voice.lobby-channel-id` isn't a voice channel | Copy the ID of the voice channel itself (not a text channel) and restart. |
+| A player isn't being moved | They must be linked (`/link`), online in game, and already in the lobby or a bot room in Discord. After a bot restart, players already in voice may need to leave and rejoin. |
+| `/link` says the code is invalid | Codes last 5 minutes and work once. Type `/link` in Minecraft for a new one. |
 | `/cmd` doesn't show in Discord | Wait a minute, then reload Discord (Ctrl+R). Make sure the bot was invited with the `applications.commands` scope. |
 | "You're not allowed to use this command" | Add your user ID or role ID under `commands` in the config, then run `/discordbridge reload`. |
 | `/start` says the server exited right away | Check `start_command` and `server_dir`, then look at the server's `logs/latest.log`. |
@@ -181,7 +176,7 @@ Changing the token or IDs needs a server restart.
 cd plugin
 gradle build
 ```
-The jar is written to `plugin/build/libs/`. (If you create the wrapper with `gradle wrapper`, use `./gradlew build`.)
+The jar is written to `plugin/build/libs/DiscordBridge-1.2.0.jar`. (Details: [docs/SETUP.md](docs/SETUP.md#part-4-get-the-plugin-jar).) (If you create the wrapper with `gradle wrapper`, use `./gradlew build`.)
 
 To publish a release, push a tag such as `v1.0.0`. GitHub Actions builds the jar and attaches it to a release.
 

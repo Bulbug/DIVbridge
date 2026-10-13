@@ -1,24 +1,30 @@
 package io.github.kaz.discordbridge;
 
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
-/** Discord -> Minecraft (chat messages and the /cmd slash command). */
+/** Discord -> Minecraft (chat messages and slash commands). */
 public class DiscordListener extends ListenerAdapter {
 
     private final DiscordBridge plugin;
@@ -32,6 +38,7 @@ public class DiscordListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
+        // Ignoring bots and webhooks also stops our own webhook chat from echoing back into the game.
         if (!event.isFromGuild() || event.getAuthor().isBot() || event.isWebhookMessage()) return;
         if (!plugin.getConfig().getBoolean("chat.discord-to-minecraft", true)) return;
 
@@ -39,29 +46,103 @@ public class DiscordListener extends ListenerAdapter {
         if (!event.getChannel().getId().equals(channelId)) return;
 
         String content = event.getMessage().getContentDisplay();
-        if (!event.getMessage().getAttachments().isEmpty()) {
-            content = (content + " [attachment]").trim();
-        }
-        if (content.isBlank()) return;
+        List<Message.Attachment> attachments = event.getMessage().getAttachments();
+        if (content.isBlank() && attachments.isEmpty()) return;
 
         Member member = event.getMember();
         String name = member != null ? member.getEffectiveName() : event.getAuthor().getName();
 
         Component line = mm.deserialize(
                 plugin.getConfig().getString("chat.discord-format",
-                        "<dark_aqua>[Discord] <white><user><gray>: <white><message>"),
+                        "<blue>[Discord]</blue> <white><user> <dark_gray>»</dark_gray> <gray><message>"),
                 Placeholder.unparsed("user", name),       // unparsed = no MiniMessage injection
                 Placeholder.unparsed("message", content));
 
-        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.broadcast(line));
+        // Attachments become clickable links: hover to see the file name, click to open.
+        for (Message.Attachment a : attachments) {
+            line = line.append(Component.text(a.isImage() ? " [image]" : " [file]", NamedTextColor.AQUA)
+                    .hoverEvent(HoverEvent.showText(Component.text(a.getFileName())))
+                    .clickEvent(ClickEvent.openUrl(a.getUrl())));
+        }
+
+        final Component out = line;
+        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.broadcast(out));
+    }
+
+    // ---------------- slash commands ----------------
+
+    @Override
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        switch (event.getName()) {
+            case "list" -> handleList(event);
+            case "cmd" -> handleCmd(event);
+            case "link" -> handleLink(event);
+            case "unlink" -> handleUnlink(event);
+            default -> { }
+        }
+    }
+
+    private void handleList(SlashCommandInteractionEvent event) {
+        if (!plugin.getConfig().getBoolean("list.enabled", true)) {
+            event.reply("This command is turned off.").setEphemeral(true).queue();
+            return;
+        }
+        // Read server data on the main thread, then reply with the card.
+        event.deferReply().queue(hook ->
+                Bukkit.getScheduler().runTask(plugin, () ->
+                        hook.editOriginalEmbeds(plugin.buildListEmbed()).queue()));
+    }
+
+    // ---------------- account linking (for proximity voice) ----------------
+
+    private void handleLink(SlashCommandInteractionEvent event) {
+        LinkManager links = plugin.links();
+        if (links == null || !plugin.getConfig().getBoolean("voice.enabled", false)) {
+            event.reply("Voice linking isn't turned on.").setEphemeral(true).queue();
+            return;
+        }
+        long discordId = event.getUser().getIdLong();
+        if (links.isLockedOut(discordId)) {
+            event.reply("Too many wrong codes. Please wait a few minutes and try again.").setEphemeral(true).queue();
+            return;
+        }
+
+        String code = event.getOption("code").getAsString().trim().toUpperCase(Locale.ROOT);
+        UUID uuid = links.redeem(code);
+        if (uuid == null) {
+            links.recordFailure(discordId);
+            event.reply("That code isn't valid or it has expired. Type `/link` in Minecraft to get a new one.")
+                    .setEphemeral(true).queue();
+            return;
+        }
+
+        links.link(discordId, uuid);
+        Player online = Bukkit.getPlayer(uuid);
+        String name = online != null ? online.getName() : "your Minecraft account";
+        event.reply("✅ Linked to **" + name.replace("*", "").replace("_", "\\_") + "**. "
+                        + "Join the lobby voice channel and walk up to other players to talk!")
+                .setEphemeral(true).queue();
+
+        if (online != null) {
+            Bukkit.getScheduler().runTask(plugin, () -> online.sendMessage(Component.text(
+                    "Linked to Discord account " + event.getUser().getName()
+                            + ". Join the lobby voice channel in Discord to use proximity voice.",
+                    NamedTextColor.GREEN)));
+        }
+    }
+
+    private void handleUnlink(SlashCommandInteractionEvent event) {
+        LinkManager links = plugin.links();
+        if (links != null && links.unlinkByDiscord(event.getUser().getIdLong())) {
+            event.reply("Your Minecraft account has been unlinked.").setEphemeral(true).queue();
+        } else {
+            event.reply("You don't have a linked account.").setEphemeral(true).queue();
+        }
     }
 
     // ---------------- /cmd ----------------
 
-    @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (!event.getName().equals("cmd")) return;
-
+    private void handleCmd(SlashCommandInteractionEvent event) {
         if (!plugin.getConfig().getBoolean("commands.enabled", true) || !isAllowed(event.getMember())) {
             event.reply("You're not allowed to use this command.").setEphemeral(true).queue();
             return;

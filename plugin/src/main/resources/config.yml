@@ -7,31 +7,66 @@ guild-id: "PASTE_SERVER_ID_HERE"       # the Discord server
 channel-id: "PASTE_CHANNEL_ID_HERE"    # the channel used for chat + notifications
 
 # ---------------------------------------------------------------
+# Look & feel
+# ---------------------------------------------------------------
+style:
+  # true  = modern embed cards with player heads
+  # false = plain text messages with emoji
+  use-embeds: true
+  server-name: "Minecraft Server"      # shown on the /list card
+  # Player head images. %uuid% is replaced with the player's UUID.
+  avatar-url: "https://mc-heads.net/avatar/%uuid%/128"
+  # Embed side-bar colors (hex)
+  colors:
+    join: "57F287"
+    first-join: "FEE75C"
+    quit: "ED4245"
+    death: "747F8D"
+    start: "57F287"
+    stop: "ED4245"
+    list: "5865F2"
+
+# ---------------------------------------------------------------
 # Chat bridge
 # ---------------------------------------------------------------
 chat:
   minecraft-to-discord: true
   discord-to-minecraft: true
-  # Sent to Discord. Placeholders: %player% %message%
+  # OPTIONAL but recommended: a webhook for the SAME channel.
+  # With it, in-game chat appears in Discord as the player (their name + head),
+  # like a real chat app. Without it, the bot posts "**Name**: message".
+  # Create one: Channel Settings > Integrations > Webhooks > New Webhook > Copy URL.
+  # Treat this URL like a password.
+  webhook-url: ""
+  # Used only when no webhook is set. Placeholders: %player% %message%
   minecraft-format: "**%player%**: %message%"
   # Shown in game (MiniMessage). Placeholders: <user> <message>
-  discord-format: "<dark_aqua>[Discord] <white><user><gray>: <white><message>"
+  # Hover over [Discord] to see where the message came from.
+  discord-format: "<hover:show_text:'<gray>Sent from Discord'><blue>[Discord]</blue></hover> <white><user> <dark_gray>»</dark_gray> <gray><message>"
 
 # ---------------------------------------------------------------
-# Notifications posted to the channel. Placeholders: %player% %online%
+# Activity cards. Placeholders: %player% %online% %message%
+# (plain text, no markdown. In embed mode this is the card's headline)
 # ---------------------------------------------------------------
 events:
   join: true
-  join-message: "🟢 **%player%** joined the server (%online% online)"
-  first-join-message: "🎉 **%player%** joined for the first time! Welcome!"
+  join-message: "%player% joined the server"
+  first-join-message: "%player% joined for the first time!"
   quit: true
-  quit-message: "🔴 **%player%** left the server (%online% online)"
+  quit-message: "%player% left the server"
   death: true
-  death-message: "💀 %message%"
+  death-message: "%message%"
   server-start: true
-  server-start-message: "✅ The server is now online!"
+  server-start-message: "The server is now online"
   server-stop: true
-  server-stop-message: "⛔ The server is shutting down."
+  server-stop-message: "The server is shutting down"
+
+# ---------------------------------------------------------------
+# /list slash command: shows who's online
+# ---------------------------------------------------------------
+list:
+  enabled: true
+  show-tps: true
 
 # ---------------------------------------------------------------
 # /cmd slash command in Discord (runs a command as the server console)
@@ -43,3 +78,20 @@ commands:
   allowed-role-ids: []     # e.g. ["123456789012345678"]
   allowed-user-ids: []     # e.g. ["123456789012345678"]
   blocked-commands: ["op", "deop"]
+
+# ---------------------------------------------------------------
+# Proximity voice (optional)
+# Players link their Minecraft account to Discord. The bot then moves them
+# between Discord voice rooms so they hear the players near them in the game.
+# Works for Bedrock and Java players (they use the Discord app for voice).
+# The plugin never listens to or records audio. It only moves people.
+# Needs a server restart to turn on. See README.md for setup.
+# ---------------------------------------------------------------
+voice:
+  enabled: false
+  lobby-channel-id: ""     # voice channel players join first; also where lone players wait
+  category-id: ""          # category where the temporary rooms are created (recommended)
+  radius: 32               # blocks: players closer than this end up in the same room
+  leave-radius-multiplier: 1.3   # stops people flip-flopping at the edge (must walk 1.3x radius to leave)
+  update-seconds: 5        # how often positions are checked (lower = faster, but Discord limits moves)
+  room-name: "Nearby %n%"  # name of the temporary rooms (%n% = room number)

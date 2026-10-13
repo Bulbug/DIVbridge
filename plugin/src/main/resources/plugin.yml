@@ -3,13 +3,24 @@ version: '${version}'
 main: io.github.kaz.discordbridge.DiscordBridge
 api-version: '1.21'
 authors: [Kaz]
-description: Chat bridge, join messages and remote commands between Minecraft and Discord.
+description: Chat bridge, join messages, remote commands and proximity voice between Minecraft and Discord.
 commands:
   discordbridge:
     description: Admin command for DiscordBridge
     usage: /discordbridge reload
     permission: discordbridge.admin
+  link:
+    description: Get a code to link your Minecraft account to Discord
+    usage: /link
+    permission: discordbridge.link
+  unlink:
+    description: Unlink your Minecraft account from Discord
+    usage: /unlink
+    permission: discordbridge.link
 permissions:
   discordbridge.admin:
     description: Reload the DiscordBridge config
     default: op
+  discordbridge.link:
+    description: Link your account for proximity voice
+    default: true
