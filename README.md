@@ -1,10 +1,10 @@
-# DiscordBridge
+# DIVbridge
 
 Connect your [PaperMC](https://papermc.io) Minecraft server to Discord.
 
 ## What is this?
 
-DiscordBridge links a Discord channel to your Minecraft server, so your community can stay
+DIVbridge links a Discord channel to your Minecraft server, so your community can stay
 connected even when they aren't in the game.
 
 **What it does**
@@ -66,8 +66,8 @@ The short version:
    **Message Content Intent**, and copy its token.
 2. Invite it to your Discord server (the guide has a ready-made invite link with the right permissions).
 3. Copy your server ID and channel ID (Discord Developer Mode, then right-click, then Copy ID).
-4. Put `DiscordBridge-x.y.z.jar` in your Paper server's `plugins/` folder, start the server once, stop it.
-5. Fill in `bot-token`, `guild-id` and `channel-id` in `plugins/DiscordBridge/config.yml`, then start the server.
+4. Put `DIVbridge-x.y.z.jar` in your Paper server's `plugins/` folder, start the server once, stop it.
+5. Fill in `bot-token`, `guild-id` and `channel-id` in `plugins/DIVbridge/config.yml`, then start the server.
 6. Look for `Connected to Discord as ...` in the console, then test chat, `/list` and `/cmd`.
 
 Optional extras, each with its own section in the guide:
@@ -122,7 +122,7 @@ The full walkthrough, with every click, is in [docs/SETUP.md](docs/SETUP.md#part
 3. Join the **Lobby** voice channel in Discord and keep Discord open while you play.
 4. Walk near other players to talk. Use `/unlink` (in game or in Discord) to remove the link.
 
-Links are stored in `plugins/DiscordBridge/links.yml`.
+Links are stored in `plugins/DIVbridge/links.yml`.
 
 ### Good to know
 
@@ -135,12 +135,12 @@ Links are stored in `plugins/DiscordBridge/links.yml`.
 ## Configuration
 
 Everything, including the colors and look of the cards (`style:`), is in [`plugin/src/main/resources/config.yml`](plugin/src/main/resources/config.yml) (the copy at
-`plugins/DiscordBridge/config.yml` on your server). Each message can be changed or turned off.
+`plugins/DIVbridge/config.yml` on your server). Each message can be changed or turned off.
 
 Placeholders: `%player%`, `%online%`, `%message%`. Messages shown in game use
 [MiniMessage](https://docs.advntr.dev/minimessage/format.html) formatting.
 
-`/discordbridge reload` (in game or console, needs `discordbridge.admin`) reloads messages and settings.
+`/divbridge reload` (in game or console, needs `divbridge.admin`) reloads messages and settings.
 Changing the token or IDs needs a server restart.
 
 ### About `/cmd`
@@ -166,7 +166,7 @@ Changing the token or IDs needs a server restart.
 | A player isn't being moved | They must be linked (`/link`), online in game, and already in the lobby or a bot room in Discord. After a bot restart, players already in voice may need to leave and rejoin. |
 | `/link` says the code is invalid | Codes last 5 minutes and work once. Type `/link` in Minecraft for a new one. |
 | `/cmd` doesn't show in Discord | Wait a minute, then reload Discord (Ctrl+R). Make sure the bot was invited with the `applications.commands` scope. |
-| "You're not allowed to use this command" | Add your user ID or role ID under `commands` in the config, then run `/discordbridge reload`. |
+| "You're not allowed to use this command" | Add your user ID or role ID under `commands` in the config, then run `/divbridge reload`. |
 | `/start` says the server exited right away | Check `start_command` and `server_dir`, then look at the server's `logs/latest.log`. |
 | `/start` says it's already online but you can't join | Check `server_port` matches your real port. |
 
@@ -176,7 +176,7 @@ Changing the token or IDs needs a server restart.
 cd plugin
 gradle build
 ```
-The jar is written to `plugin/build/libs/DiscordBridge-1.2.0.jar`. (Details: [docs/SETUP.md](docs/SETUP.md#part-4-get-the-plugin-jar).) (If you create the wrapper with `gradle wrapper`, use `./gradlew build`.)
+The jar is written to `plugin/build/libs/DIVbridge-1.2.0.jar`. (Details: [docs/SETUP.md](docs/SETUP.md#part-4-get-the-plugin-jar).) (If you create the wrapper with `gradle wrapper`, use `./gradlew build`.)
 
 To publish a release, push a tag such as `v1.0.0`. GitHub Actions builds the jar and attaches it to a release.
 

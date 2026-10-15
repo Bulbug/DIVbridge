@@ -30,7 +30,7 @@ jobs:
       - name: Keep the jar as a build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DiscordBridge
+          name: DIVbridge
           path: plugin/build/libs/*.jar
 
       # Pushing a tag like v1.0.0 publishes a GitHub Release with the jar attached

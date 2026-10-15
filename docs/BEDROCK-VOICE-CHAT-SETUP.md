@@ -3,7 +3,7 @@
 This sets up **Bedrock Voice Chat (BVC)**, a separate open-source project, so Bedrock players on your Geyser
 server can talk in game and **only hear the players near them**, with voices fading as people walk apart.
 
-> DiscordBridge does not include this voice system. This guide is based on the BVC wiki
+> DIVbridge does not include this voice system. This guide is based on the BVC wiki
 > (https://github.com/Alaydriem/bedrock-voice-chat/wiki) and has not been tested by the author. BVC changes
 > over time. If something here disagrees with the wiki, trust the wiki. Places where I'm unsure are marked
 > **(check)**.
@@ -396,5 +396,5 @@ For other problems, the BVC wiki links a Discord server for support.
 - [ ] Every player added with `user add`
 - [ ] Players have the app, logged in, connected to `voice.yourdomain.com`
 - [ ] Two-person test passed (close = hear, far = silence)
-- [ ] If you also use DiscordBridge proximity voice, turned it off (`voice.enabled: false`) so there's only
+- [ ] If you also use DIVbridge proximity voice, turned it off (`voice.enabled: false`) so there's only
       one voice system

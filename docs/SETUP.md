@@ -1,4 +1,4 @@
-# DiscordBridge: complete setup guide
+# DIVbridge: complete setup guide
 
 This guide walks through everything, one small step at a time, with exact buttons to click and exact text to
 type. Do the parts in order. Parts 1-5 give you the basics (chat, join messages, `/list`). Part 6 and
@@ -98,7 +98,7 @@ Each ID is a long number like `123456789012345678`.
 ## Part 4: Get the plugin jar
 
 **Option A: download a release** (if the project is published on GitHub): go to the project's
-**Releases** page and download `DiscordBridge-x.y.z.jar`. Then skip to Part 5.
+**Releases** page and download `DIVbridge-x.y.z.jar`. Then skip to Part 5.
 
 **Option B: build it yourself from this folder.**
 
@@ -110,7 +110,7 @@ Each ID is a long number like `123456789012345678`.
    gradle build
    ```
    The first run downloads libraries and can take a few minutes. It should end with `BUILD SUCCESSFUL`.
-4. Your jar is at `plugin/build/libs/DiscordBridge-1.2.0.jar`.
+4. Your jar is at `plugin/build/libs/DIVbridge-1.2.0.jar`.
 
 **Using IntelliJ IDEA instead:** File > Open, choose the `plugin` folder, wait for the Gradle import to
 finish, open the **Gradle** panel on the right, and double-click **Tasks > build > build**.
@@ -122,15 +122,15 @@ If the build fails, copy the first error line and see [Troubleshooting](#trouble
 ### 5.1 Install
 
 1. Stop your Minecraft server.
-2. Copy `DiscordBridge-1.2.0.jar` into the server's `plugins` folder.
+2. Copy `DIVbridge-1.2.0.jar` into the server's `plugins` folder.
 3. Start the server. Wait until it says it's done loading.
-4. In the console you will see a warning like `No bot token set in plugins/DiscordBridge/config.yml`.
+4. In the console you will see a warning like `No bot token set in plugins/DIVbridge/config.yml`.
    That is expected. It means the plugin loaded and created its config file.
 5. Stop the server again.
 
 ### 5.2 Edit the config
 
-Open `plugins/DiscordBridge/config.yml` in a text editor (Notepad, VS Code, nano). Change **only the first
+Open `plugins/DIVbridge/config.yml` in a text editor (Notepad, VS Code, nano). Change **only the first
 three lines**. Keep the quotes:
 
 ```yaml
@@ -168,7 +168,7 @@ commands:
 2. Look in the console for this line:
 
    ```
-   [DiscordBridge] Connected to Discord as MC Bridge
+   [DIVbridge] Connected to Discord as MC Bridge
    ```
 3. In Discord, your bot should now show as **online**, and a card saying "The server is now online"
    should appear in your channel.
@@ -208,7 +208,7 @@ the player, with their name and head, like a normal chat app.
    chat:
      webhook-url: "https://discord.com/api/webhooks/123456789/abcdefg..."
    ```
-4. In the game or console, run `/discordbridge reload`.
+4. In the game or console, run `/divbridge reload`.
 5. Say something in game. It should now show up under the player's name.
 
 Notes:
@@ -224,7 +224,7 @@ you completely trust.
 
 1. Make sure your ID is listed in `config.yml` (see 5.2), or use a role ID in `allowed-role-ids` to allow
    everyone with that role.
-2. Run `/discordbridge reload`.
+2. Run `/divbridge reload`.
 3. In Discord type `/cmd`, pick the `command` option and enter a command **without** the leading `/`:
 
 | You type | What happens |
@@ -279,7 +279,7 @@ voice:
 Then **restart the server** (a reload isn't enough for this part). In the console you should see:
 
 ```
-[DiscordBridge] Proximity voice is on (radius 32.0 blocks).
+[DIVbridge] Proximity voice is on (radius 32.0 blocks).
 ```
 
 ### 6c.3 What your players do
@@ -407,8 +407,8 @@ Wants=network-online.target
 
 [Service]
 User=mc
-WorkingDirectory=/home/mc/DiscordBridge/launcher
-ExecStart=/home/mc/DiscordBridge/launcher/.venv/bin/python launcher_bot.py
+WorkingDirectory=/home/mc/DIVbridge/launcher
+ExecStart=/home/mc/DIVbridge/launcher/.venv/bin/python launcher_bot.py
 Restart=always
 RestartSec=10
 # Important: if this service restarts, don't kill the Minecraft server it started.
@@ -436,7 +436,7 @@ To **stop** the server from Discord, use `/cmd command:stop` (Part 6b).
 
 | What you see | What it means and what to do |
 |---|---|
-| `No bot token set in plugins/DiscordBridge/config.yml...` | The token is still `PASTE_BOT_TOKEN_HERE` or empty. Do 5.2, then restart. |
+| `No bot token set in plugins/DIVbridge/config.yml...` | The token is still `PASTE_BOT_TOKEN_HERE` or empty. Do 5.2, then restart. |
 | `Could not connect to Discord: ... (is bot-token correct?)` | The token is wrong, has spaces, or was reset. Reset it in the portal (Bot > Reset Token) and paste the new one. Also check that **Message Content Intent** is ON. |
 | `Could not find the channel. Check channel-id...` | Wrong channel ID, or the bot can't see the channel (see Part 3, step 3). Copy the ID from the **text channel** itself. |
 | `Could not find the Discord server. Check guild-id...` | Wrong server ID, or the bot wasn't invited to that server (Part 2). |
@@ -453,7 +453,7 @@ To **stop** the server from Discord, use `/cmd command:stop` (Part 6b).
 | Discord messages don't appear in game | Turn ON Message Content Intent (Part 1, step 7), restart, and type in the exact channel from `channel-id`. |
 | Cards don't appear, only plain text, or nothing posts | The bot needs **Embed Links**. Or set `style.use-embeds: false`. |
 | `/list` or `/cmd` don't show up | Wait a minute, press `Ctrl+R` in Discord. If still missing, re-invite with `applications.commands` and restart the server. |
-| "You're not allowed to use this command." | Add your user ID or role ID under `commands:` in the config, save, then run `/discordbridge reload`. |
+| "You're not allowed to use this command." | Add your user ID or role ID under `commands:` in the config, save, then run `/divbridge reload`. |
 | In-game chat still shows as the bot, not the player | `chat.webhook-url` is empty or isn't a valid `https://discord.com/api/webhooks/...` URL. Reload after changing. |
 | A player isn't moved in voice | They must be linked (`/link`), online in game, and already in the Lobby or a `Nearby` room. After a plugin restart, they may need to leave and rejoin voice. |
 | `/link` says the code is invalid | Codes last 5 minutes and work once. Type `/link` in Minecraft for a new one. After 5 wrong tries you're locked out for 10 minutes. |
@@ -462,7 +462,7 @@ To **stop** the server from Discord, use `/cmd command:stop` (Part 6b).
 | `/start`: "The server exited right away" | `start_command` or `server_dir` is wrong. Run the same command by hand in `server_dir` to see the error. Check `logs/latest.log`. |
 | `/start` says already online but you can't join | `server_port` doesn't match your `server.properties`. |
 
-**Still stuck?** Copy the lines from the server console that contain `DiscordBridge`, plus what you did, and
+**Still stuck?** Copy the lines from the server console that contain `DIVbridge`, plus what you did, and
 ask for help.
 
 ## Updating and backups
@@ -476,8 +476,8 @@ ask for help.
    values across.
 
 **Back up these files** (copy them somewhere safe now and then):
-- `plugins/DiscordBridge/config.yml` (your token and settings)
-- `plugins/DiscordBridge/links.yml` (players' linked Discord accounts)
+- `plugins/DIVbridge/config.yml` (your token and settings)
+- `plugins/DIVbridge/links.yml` (players' linked Discord accounts)
 - `launcher/config.json` (if you use the launcher)
 
 **If a token leaks:** go to the Developer Portal > your application > **Bot** > **Reset Token**, paste the new

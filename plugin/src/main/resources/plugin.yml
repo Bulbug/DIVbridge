@@ -1,26 +1,25 @@
-name: DiscordBridge
+name: DIVbridge
 version: '${version}'
-main: io.github.kaz.discordbridge.DiscordBridge
+main: divbridge.DIVbridge
 api-version: '1.21'
-authors: [Kaz]
 description: Chat bridge, join messages, remote commands and proximity voice between Minecraft and Discord.
 commands:
-  discordbridge:
-    description: Admin command for DiscordBridge
-    usage: /discordbridge reload
-    permission: discordbridge.admin
+  divbridge:
+    description: Admin command for DIVbridge
+    usage: /divbridge reload
+    permission: divbridge.admin
   link:
     description: Get a code to link your Minecraft account to Discord
     usage: /link
-    permission: discordbridge.link
+    permission: divbridge.link
   unlink:
     description: Unlink your Minecraft account from Discord
     usage: /unlink
-    permission: discordbridge.link
+    permission: divbridge.link
 permissions:
-  discordbridge.admin:
-    description: Reload the DiscordBridge config
+  divbridge.admin:
+    description: Reload the DIVbridge config
     default: op
-  discordbridge.link:
+  divbridge.link:
     description: Link your account for proximity voice
     default: true
